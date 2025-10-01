@@ -1,80 +1,83 @@
 <html layout:decorate="~{layout}">
 <div layout:fragment="content" class="container my-3">
-    <div class="row">
-        <div class="col-12 text-center">
-            <h1>Himedia Team2 커뮤니티</h1>
-            <p class="lead">질문과 답변을 나누는 공간입니다</p>
-        </div>
-    </div>
+	<div class="row">
+		<div class="col-12 text-center">
+			<h1>Himedia Team2 커뮤니티</h1>
+			<p class="lead">질문과 답변을 나누는 공간입니다</p>
+		</div>
+	</div>
 
-    <div class="row mt-4">
-        <!-- 공지사항 -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5>공지사항</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        <li th:each="notice : ${recentNotices}">
-                            <a th:href="@{|/notice/detail/${notice.id}|}"
-                               th:text="${#strings.abbreviate(notice.subject, 30)}"></a>
-                        </li>
-                    </ul>
-                    <a href="/notice/list" class="btn btn-sm btn-outline-primary">더보기</a>
-                </div>
-            </div>
-        </div>
+	<div class="row mt-4">
+		<!-- 공지사항 -->
+		<div class="col-md-4">
+			<div class="card">
+				<div class="card-header">
+					<h5>공지사항</h5>
+				</div>
+				<div class="card-body">
+					<ul class="list-unstyled">
+						<li th:each="notice : ${recentNotices}">
+							<a th:href="@{|/notice/detail/${notice.id}|}"
+								th:text="${#strings.abbreviate(notice.subject, 30)}"></a>
+							<small class="text-muted" th:text="|조회 ${notice.viewCount}|"></small>
+						</li>
+					</ul>
+					<a href="/notice/list" class="btn btn-sm btn-outline-primary">더보기</a>
+				</div>
+			</div>
+		</div>
 
-        <!-- 자유게시판 최신글 -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5>자유게시판</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        <li th:each="freeBoard : ${recentFreeBoards}">
-                            <a th:href="@{|/free/detail/${freeBoard.id}|}"
-                               th:text="${#strings.abbreviate(freeBoard.subject, 30)}"></a>
-                        </li>
-                    </ul>
-                    <a href="/free/list" class="btn btn-sm btn-outline-success">더보기</a>
-                </div>
-            </div>
-        </div>
+		<!-- 자유게시판 최신글 -->
+		<div class="col-md-4">
+			<div class="card">
+				<div class="card-header">
+					<h5>자유게시판</h5>
+				</div>
+				<div class="card-body">
+					<ul class="list-unstyled">
+						<li th:each="freeBoard : ${recentFreeBoards}">
+							<a th:href="@{|/free/detail/${freeBoard.id}|}"
+								th:text="${#strings.abbreviate(freeBoard.subject, 30)}"></a>
+							<small class="text-muted" th:text="|조회 ${freeBoard.viewCount}|"></small>
+						</li>
+					</ul>
+					<a href="/free/list" class="btn btn-sm btn-outline-success">더보기</a>
+				</div>
+			</div>
+		</div>
 
-        <!-- 질문/답변 인기글 -->
-        <div class="col-md-4">
-            <div class="card">
-                <div class="card-header">
-                    <h5>인기 질문</h5>
-                </div>
-                <div class="card-body">
-                    <ul class="list-unstyled">
-                        <li th:each="question : ${popularQuestions}">
-                            <a th:href="@{|/question/detail/${question.id}|}"
-                               th:text="${#strings.abbreviate(question.subject, 30)}"></a>
-                            <small class="text-muted" th:text="|조회 ${question.viewCount}|"></small>
-                        </li>
-                    </ul>
-                    <a href="/question/list" class="btn btn-sm btn-outline-info">더보기</a>
-                </div>
-            </div>
-        </div>
-    </div>
+		<!-- 질문/답변 인기글 -->
+		<div class="col-md-4">
+			<div class="card">
+				<div class="card-header">
+					<h5>인기 질문</h5>
+				</div>
+				<div class="card-body">
+					<ul class="list-unstyled">
+						<li th:each="question : ${popularQuestions}">
+							<a th:href="@{|/question/detail/${question.id}|}"
+								th:text="${#strings.abbreviate(question.subject, 30)}"></a>
+							<small class="text-muted" th:text="|조회 ${question.viewCount}|"></small>
+						</li>
+					</ul>
+					<a href="/question/list" class="btn btn-sm btn-outline-info">더보기</a>
+				</div>
+			</div>
+		</div>
+	</div>
 
-    <!-- 통계 정보 -->
-    <div class="row mt-4">
-        <div class="col-md-12">
-            <div class="card bg-light">
-                <div class="card-body text-center">
-                    <span class="me-4" th:text="|총 질문: ${totalQuestions}개|">총 질문: 0개</span>
-                    <span class="me-4" th:text="|총 답변: ${totalAnswers}개|">총 답변: 0개</span>
-                    <span class="me-4" th:text="|총 회원: ${totalUsers}명|">총 회원: 0명</span>
-                </div>
-            </div>
-        </div>
-    </div>
+	<!-- 통계 정보 -->
+	<div class="row mt-4">
+		<div class="col-md-12">
+			<div class="card bg-light">
+				<div class="card-body text-center">
+					<span class="me-4" th:text="|총 질문: ${totalQuestions}개|">총 질문: 0개</span>
+					<span class="me-4" th:text="|총 답변: ${totalAnswers}개|">총 답변: 0개</span>
+					<span class="me-4" th:text="|총 회원: ${totalUsers}명|">총 회원: 0명</span>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
+
 </html>
