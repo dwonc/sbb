@@ -1,0 +1,18 @@
+<!-- src/main/resources/templates/notice_form.html -->
+<html layout:decorate="~{layout}">
+<div layout:fragment="content" class="container">
+    <h5 class="my-3 border-bottom pb-2">공지사항 작성</h5>
+    <form th:action="@{/notice/create}" method="post">
+        <div class="mb-3">
+            <label for="subject" class="form-label">제목</label>
+            <input type="text" name="subject" id="subject" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="content" class="form-label">내용</label>
+            <textarea name="content" id="content" class="form-control" rows="10" required></textarea>
+        </div>
+        <input type="submit" value="저장하기" class="btn btn-primary my-2">
+        <a th:href="@{/notice/list}" class="btn btn-secondary">취소</a>
+    </form>
+</div>
+</html>

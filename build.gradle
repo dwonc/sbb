@@ -1,0 +1,65 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.5.6'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.mysite'
+version = '5.0.1'
+description = 'sbb project for Spring Boot'
+
+java {
+
+	sourceCompatibility = '21'
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+   	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+   	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+    implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
+    implementation 'org.commonmark:commonmark:0.21.0'
+    implementation 'com.cloudinary:cloudinary-http44:1.36.0'
+    
+   	
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
+	developmentOnly 'org.springframework.boot:spring-boot-devtools' 
+	compileOnly 'org.projectlombok:lombok' 
+    annotationProcessor 'org.projectlombok:lombok' 
+   	// runtimeOnly 'com.h2database:h2'
+   	runtimeOnly 'com.mysql:mysql-connector-j'
+  
+}
+
+// 모든 JavaExec 태스크에 JVM 옵션 적용
+tasks.withType(JavaExec) {
+    jvmArgs '-XX:+EnableDynamicAgentLoading'
+}
+
+// 테스트 태스크
+test {
+    useJUnitPlatform()
+    jvmArgs '-XX:+EnableDynamicAgentLoading'
+    systemProperty 'mockito.mock.maker', 'mock-maker-inline'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
+compileJava {
+    options.compilerArgs += ['-parameters']
+}

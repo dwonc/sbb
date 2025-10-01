@@ -1,0 +1,93 @@
+<html layout:decorate="~{layout}">
+<div layout:fragment="content" class="container my-3">
+	<h2 class="border-bottom py-2" th:text="${freeboard.subject}"></h2>
+	<!-- 조회수 추가 -->
+	<div class="mb-2 text-muted text-end">
+		조회수: <span th:text="${freeboard.viewCount}"></span>
+	</div>
+	<div class="card my-3">
+		<div class="card-body">
+			<div th:if="${freeboard.imageUrl != null}" class="mb-3">
+				<img th:src="${freeboard.imageUrl}" class="img-fluid rounded" alt="첨부 이미지"
+					style="max-width: 100%; height: auto;">
+			</div>
+			<div class="card-text" style="white-space: pre-line;" th:text="${freeboard.content}"></div>
+			<div class="d-flex justify-content-end">
+				<div class="badge bg-light text-dark p-2 text-start">
+					<div class="fw-bold" th:text="${freeboard.author != null ? freeboard.author.username : '알 수 없음'}">
+					</div>
+					<div th:text="${#temporals.format(freeboard.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+					<div class='my-3'>
+						<a th:href="@{|/free/modify/${freeboard.id}|}" class="btn btn-sm btn-outline-secondary"
+							sec:authorize="isAuthenticated()"
+							th:if="${freeboard.author != null and #authentication.getPrincipal().getUsername() == freeboard.author.username}"
+							th:text="수정"></a>
+						<a href="javascript:void(0);" th:data-uri="@{|/free/delete/${freeboard.id}|}"
+							class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
+							th:if="${freeboard.author != null and #authentication.getPrincipal().getUsername() == freeboard.author.username}"
+							th:text="삭제"></a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- 댓글 목록 -->
+	<h5 class="border-bottom my-3 py-2" th:text="|${#lists.size(freeboard.commentList)}개의 댓글이 있습니다.|"></h5>
+	<div class="card my-3" th:each="freeComment : ${freeboard.commentList}">
+		<a th:id="|freecomment_${freeComment.id}|"></a>
+		<div class="card-body">
+			<div class="card-text" style="white-space: pre-line;" th:text="${freeComment.content}"></div>
+			<div class="d-flex justify-content-end">
+				<div class="badge bg-light text-dark p-2 text-start">
+					<div class="mb-2">
+						<span th:if="${freeComment.author != null}" th:text="${freeComment.author.username}"></span>
+					</div>
+					<div th:text="${#temporals.format(freeComment.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+				</div>
+			</div>
+			<div class="my-3">
+				<a th:href="@{|/freecomment/vote/${freeComment.id}|}"
+					class="recommend btn btn-sm btn-outline-secondary">
+					추천
+					<span class="badge rounded-pill bg-success" th:text="${#lists.size(freeComment.voter)}"></span>
+				</a>
+				<a th:href="@{|/freecomment/modify/${freeComment.id}|}" class="btn btn-sm btn-outline-secondary"
+					sec:authorize="isAuthenticated()"
+					th:if="${freeComment.author != null and #authentication.getPrincipal().getUsername() == freeComment.author.username}"
+					th:text="수정"></a>
+				<a href="javascript:void(0);" class="delete btn btn-sm btn-outline-secondary"
+					sec:authorize="isAuthenticated()"
+					th:if="${freeComment.author != null and #authentication.getPrincipal().getUsername() == freeComment.author.username}"
+					th:data-uri="@{|/freecomment/delete/${freeComment.id}|}" th:text="삭제"></a>
+			</div>
+		</div>
+	</div>
+
+	<!-- 댓글 작성 -->
+	<form th:action="@{|/freecomment/create/${freeboard.id}|}" th:object="${freeCommentForm}" method="post"
+		class="my-3">
+		<div th:replace="form_errors :: formErrorsFragment"></div>
+		<div class="mb-3">
+			<label for="content" class="form-label">댓글내용</label>
+			<textarea th:field="*{content}" class="form-control" rows="4"></textarea>
+		</div>
+		<input type="submit" value="댓글등록" class="btn btn-primary">
+	</form>
+
+	<div class="my-3">
+		<a th:href="@{/free/list}" class="btn btn-secondary">목록으로</a>
+	</div>
+</div>
+<script layout:fragment="script" type='text/javascript'>
+	const delete_elements = document.getElementsByClassName("delete");
+	Array.from(delete_elements).forEach(function (element) {
+		element.addEventListener('click', function () {
+			if (confirm("정말로 삭제하시겠습니까?")) {
+				location.href = this.dataset.uri;
+			};
+		});
+	});
+</script>
+
+</html>

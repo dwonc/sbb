@@ -1,0 +1,35 @@
+<html layout:decorate="~{layout}">
+<div layout:fragment="content" class="container">
+	<h5 class="my-3 border-bottom pb-2">자유게시판 글 작성</h5>
+	<form th:action="@{${freeboardForm.id != null ? '/free/modify/' + freeboardForm.id : '/free/create'}}" method="post"
+		enctype="multipart/form-data">
+		<div class="mb-3">
+			<label for="subject" class="form-label">제목</label>
+			<input type="text" name="subject" id="subject" class="form-control" required>
+		</div>
+		<div class="mb-3">
+			<label for="content" class="form-label">내용</label>
+			<textarea name="content" id="content" class="form-control" rows="10" required></textarea>
+		</div>
+
+		<!-- 기존 이미지가 있으면 표시 -->
+		<div class="mb-3" th:if="${freeboardForm.imageUrl != null}">
+			<label class="form-label">현재 이미지</label>
+			<div>
+				<img th:src="${freeboardForm.imageUrl}" class="img-thumbnail" style="max-width: 300px;" alt="현재 이미지">
+			</div>
+		</div>
+
+		<!-- 새 이미지 업로드 -->
+		<div class="mb-3">
+			<label for="imageFile" class="form-label">이미지 첨부 (선택)</label>
+			<input type="file" name="imageFile" id="imageFile" class="form-control" accept="image/*">
+			<small class="text-muted">새 이미지를 선택하면 기존 이미지가 교체됩니다. 최대 5MB</small>
+		</div>
+
+		<input type="submit" value="저장하기" class="btn btn-primary my-2">
+		<a th:href="@{/free/list}" class="btn btn-secondary">취소</a>
+	</form>
+</div>
+
+</html>

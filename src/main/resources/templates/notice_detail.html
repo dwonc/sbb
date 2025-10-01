@@ -1,0 +1,23 @@
+<html layout:decorate="~{layout}">
+<div layout:fragment="content" class="container my-3">
+	<h2 class="border-bottom py-2" th:text="${notice.subject}"></h2>
+	<!-- 조회수 추가 -->
+	<div class="mb-2 text-muted text-end">
+		조회수: <span th:text="${notice.viewCount}"></span>
+	</div>
+	<div class="card my-3">
+		<div class="card-body">
+			<div class="card-text" style="white-space: pre-line;" th:text="${notice.content}"></div>
+			<div class="d-flex justify-content-end">
+				<div class="badge bg-light text-dark p-2 text-start">
+					<div th:text="${#temporals.format(notice.createDate, 'yyyy-MM-dd HH:mm')}"></div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="my-3">
+		<a th:href="@{/notice/list}" class="btn btn-secondary">목록으로</a>
+	</div>
+</div>
+
+</html>

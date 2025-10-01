@@ -1,0 +1,102 @@
+<html layout:decorate="~{layout}">
+<div layout:fragment="content" class="container my-3">
+    <h3 th:text="|${user.username}님의 프로필|"></h3>
+    
+    <!-- 통계 -->
+    <div class="row my-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>작성한 질문</h5>
+                    <h2 th:text="${#lists.size(questions)}"></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>작성한 답변</h5>
+                    <h2 th:text="${#lists.size(answers)}"></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>자유게시판 글</h5>
+                    <h2 th:text="${#lists.size(freeBoards)}"></h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5>작성한 댓글</h5>
+                    <h2 th:text="${#lists.size(freeComments)}"></h2>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 최근 작성 질문 -->
+    <h5 class="border-bottom py-2">최근 작성한 질문</h5>
+    <table class="table">
+        <tbody>
+            <tr th:each="question : ${questions}">
+                <td>
+                    <a th:href="@{|/question/detail/${question.id}|}" th:text="${question.subject}"></a>
+                </td>
+                <td th:text="${#temporals.format(question.createDate, 'yyyy-MM-dd')}"></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <!-- 최근 작성 답변 -->
+    <h5 class="border-bottom py-2 mt-4">최근 작성한 답변</h5>
+    <table class="table">
+        <tbody>
+            <tr th:each="answer : ${answers}">
+                <td>
+                    <a th:href="@{|/question/detail/${answer.question.id}#answer_${answer.id}|}" 
+                       th:text="${#strings.abbreviate(answer.content, 50)}"></a>
+                </td>
+                <td th:text="${#temporals.format(answer.createDate, 'yyyy-MM-dd')}"></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <!-- 최근 작성 자유게시판 글 -->
+    <h5 class="border-bottom py-2 mt-4">최근 작성한 자유게시판 글</h5>
+    <table class="table">
+        <tbody>
+            <tr th:each="freeBoard : ${freeBoards}">
+                <td>
+                    <a th:href="@{|/free/detail/${freeBoard.id}|}" th:text="${freeBoard.subject}"></a>
+                </td>
+                <td th:text="${#temporals.format(freeBoard.createDate, 'yyyy-MM-dd')}"></td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <!-- 최근 작성 댓글 -->
+    <h5 class="border-bottom py-2 mt-4">최근 작성한 댓글</h5>
+    <table class="table">
+        <tbody>
+            <tr th:each="freeComment : ${freeComments}">
+                <td>
+                    <a th:href="@{|/free/detail/${freeComment.freeBoard.id}#freecomment_${freeComment.id}|}" 
+                       th:text="${#strings.abbreviate(freeComment.content, 50)}"></a>
+                </td>
+                <td th:text="${#temporals.format(freeComment.createDate, 'yyyy-MM-dd')}"></td>
+            </tr>
+        </tbody>
+    </table>
+	
+	<div class="text-end" sec:authorize="isAuthenticated()">
+		<a th:href="@{|/user/profile/${#authentication.principal.username}/modify|}">회원정보 수정</a>
+	</div>
+	<div class="text-end">
+		<a href="#">회원탈퇴</a>
+	</div>
+</div>
+</html>
