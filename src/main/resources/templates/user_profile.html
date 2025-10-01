@@ -93,7 +93,7 @@
     </table>
 	
 	<div class="text-end" sec:authorize="isAuthenticated()">
-		<a th:href="@{|/user/profile/${#authentication.principal.username}/modify|}">회원정보 수정</a>
+		<a th:href="@{|/user/profile/${#authentication.name}/modify|}">회원정보 수정</a>
 	</div>
 	<div class="text-end">
 		<a href="#">회원탈퇴</a>

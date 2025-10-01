@@ -6,6 +6,8 @@ import java.security.Principal;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -48,13 +50,26 @@ public class FreeBoardController {
 		return "freeboard_form";
 	}
 
+	private String getUserIdentifier(Principal principal) {
+		if (principal instanceof Authentication) {
+			Authentication auth = (Authentication) principal;
+			if(auth.getPrincipal() instanceof OAuth2User) {
+				OAuth2User oauth2User = (OAuth2User) auth.getPrincipal();
+				// OAuth2 로그인 : email로 찾기
+				return (String) oauth2User.getAttributes().get("email");
+			}
+		}
+		return principal.getName();
+	}
+	
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/create")
     public String freeBoardCreate(@Valid FreeBoardForm freeboardForm, BindingResult bindingResult,@RequestParam(value = "imageFile", required = false) MultipartFile imageFile, Principal principal) {
 		if (bindingResult.hasErrors()) {
             return "freeboard_form";
         }
-		SiteUser siteUser = this.userService.getUser(principal.getName());
+		String identifier = getUserIdentifier(principal);
+		SiteUser siteUser = this.userService.getUser(identifier);
 		try {
 			this.freeBoardService.create(freeboardForm.getSubject(), freeboardForm.getContent(), siteUser, imageFile);
 		} catch (IOException e) {
@@ -76,8 +91,12 @@ public class FreeBoardController {
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/modify/{id}")
 	public String freeBoardModify(Model model, @PathVariable("id") Integer id, Principal principal) {
+		String identifier = getUserIdentifier(principal);
+	    SiteUser currentUser = this.userService.getUser(identifier); // identifier(ID 또는 Email)로 사용자 조회
+
 		FreeBoard freeBoard = this.freeBoardService.getFreeBoard(id);
-		if(!freeBoard.getAuthor().getUsername().equals(principal.getName())) {
+		
+		if(!freeBoard.getAuthor().equals(currentUser)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다."); }
 		
 		FreeBoardForm freeboardForm = new FreeBoardForm();
@@ -98,8 +117,12 @@ public class FreeBoardController {
 		if(bindingResult.hasErrors()) {
 			return "freeboard_form";
 		}
+		String identifier = getUserIdentifier(principal);
+	    SiteUser currentUser = this.userService.getUser(identifier); // identifier(ID 또는 Email)로 사용자 조회
+
 		FreeBoard freeboard = this.freeBoardService.getFreeBoard(id);
-		if(!freeboard.getAuthor().getUsername().equals(principal.getName())) {
+		
+		if(!freeboard.getAuthor().equals(currentUser)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다."); }
 		try {
 			this.freeBoardService.modify(freeboard, freeboardForm.getSubject(), freeboardForm.getContent(), imageFile);
@@ -113,8 +136,11 @@ public class FreeBoardController {
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/delete/{id}")
 	public String freeBoardDelete(Principal principal, @PathVariable("id") Integer id) {
+		String identifier = getUserIdentifier(principal);
+	    SiteUser currentUser = this.userService.getUser(identifier); // identifier(ID 또는 Email)로 사용자 조회
+	    
 		FreeBoard freeboard = this.freeBoardService.getFreeBoard(id);
-		if(!freeboard.getAuthor().getUsername().equals(principal.getName())) {
+		if(!freeboard.getAuthor().equals(currentUser)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제 권한이 없습니다."); }
 		this.freeBoardService.delete(freeboard);
 		return "redirect:/";

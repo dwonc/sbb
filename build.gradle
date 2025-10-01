@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.mysite'
-version = '5.0.1'
+version = '6.0.1'
 description = 'sbb project for Spring Boot'
 
 java {
@@ -30,6 +30,7 @@ dependencies {
     implementation 'org.thymeleaf.extras:thymeleaf-extras-springsecurity6'
     implementation 'org.commonmark:commonmark:0.21.0'
     implementation 'com.cloudinary:cloudinary-http44:1.36.0'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     
    	
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'

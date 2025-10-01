@@ -20,11 +20,11 @@
 					<div class='my-3'>
 						<a th:href="@{|/free/modify/${freeboard.id}|}" class="btn btn-sm btn-outline-secondary"
 							sec:authorize="isAuthenticated()"
-							th:if="${freeboard.author != null and #authentication.getPrincipal().getUsername() == freeboard.author.username}"
+							th:if="${freeboard.author != null and (#authentication.name == freeboard.author.username or #authentication.name == freeboard.author.email)}"
 							th:text="수정"></a>
 						<a href="javascript:void(0);" th:data-uri="@{|/free/delete/${freeboard.id}|}"
 							class="delete btn btn-sm btn-outline-secondary" sec:authorize="isAuthenticated()"
-							th:if="${freeboard.author != null and #authentication.getPrincipal().getUsername() == freeboard.author.username}"
+							th:if="${freeboard.author != null and (#authentication.name == freeboard.author.username or #authentication.name == freeboard.author.email)}"
 							th:text="삭제"></a>
 					</div>
 				</div>
@@ -54,11 +54,11 @@
 				</a>
 				<a th:href="@{|/freecomment/modify/${freeComment.id}|}" class="btn btn-sm btn-outline-secondary"
 					sec:authorize="isAuthenticated()"
-					th:if="${freeComment.author != null and #authentication.getPrincipal().getUsername() == freeComment.author.username}"
+					th:if="${freeComment.author != null and (#authentication.name == freeComment.author.username or #authentication.name == freeComment.author.email)}"
 					th:text="수정"></a>
 				<a href="javascript:void(0);" class="delete btn btn-sm btn-outline-secondary"
 					sec:authorize="isAuthenticated()"
-					th:if="${freeComment.author != null and #authentication.getPrincipal().getUsername() == freeComment.author.username}"
+					th:if="${freeComment.author != null and (#authentication.name == freeComment.author.username or #authentication.name == freeComment.author.email)}"
 					th:data-uri="@{|/freecomment/delete/${freeComment.id}|}" th:text="삭제"></a>
 			</div>
 		</div>

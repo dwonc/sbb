@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,6 +34,18 @@ public class AnswerController {
     private final AnswerService answerService;
 	private final QuestionService questionService;
 	private final UserService userService;
+	
+	private String getUserIdentifier(Principal principal) {
+		if (principal instanceof Authentication) {
+			Authentication auth = (Authentication) principal;
+			if(auth.getPrincipal() instanceof OAuth2User) {
+				OAuth2User oauth2User = (OAuth2User) auth.getPrincipal();
+				// OAuth2 로그인 : email로 찾기
+				return (String) oauth2User.getAttributes().get("email");
+			}
+		}
+		return principal.getName();
+	}
 	
 	@PreAuthorize("isAuthenticated()")
 	@PostMapping("/create/{id}")
@@ -52,8 +66,12 @@ public class AnswerController {
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/modify/{id}")
 	public String answerModify(AnswerForm answerForm, @PathVariable ("id") Integer id, Principal principal) {
+	
+		String identifier = getUserIdentifier(principal);
+	    SiteUser currentUser = this.userService.getUser(identifier); // identifier(ID 또는 Email)로 사용자 조회
+
 		Answer answer = this.answerService.getAnswer(id);
-		if (!answer.getAuthor().getUsername().equals(principal.getName())) {
+		if (!answer.getAuthor().equals(currentUser)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다."); }
 		answerForm.setContent(answer.getContent());
 		return "answer_form";
@@ -65,19 +83,25 @@ public class AnswerController {
 		if (bindingResult.hasErrors()) {
 			return "answer_form";
 		}
+		String identifier = getUserIdentifier(principal);
+	    SiteUser currentUser = this.userService.getUser(identifier); // identifier(ID 또는 Email)로 사용자 조회
+
 		Answer answer = this.answerService.getAnswer(id);
-		if (!answer.getAuthor().getUsername().equals(principal.getName())) {
+		if (!answer.getAuthor().equals(currentUser)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"수정권한이 없습니다."); }
 		
 		this.answerService.modify(answer, answerForm.getContent());
-		return String.format("redirect:/question/detail/%s#answer_%s", answer.getQuestion().getId());
+		return String.format("redirect:/question/detail/%s#answer_%s", answer.getQuestion().getId(), answer.getId());
 		}
 	
 	@PreAuthorize("isAuthenticated()")
 	@GetMapping("/delete/{id}")
 	public String answerDelete(Principal principal, @PathVariable("id") Integer id) {
+		String identifier = getUserIdentifier(principal);
+	    SiteUser currentUser = this.userService.getUser(identifier); // identifier(ID 또는 Email)로 사용자 조회
+
 		Answer answer = this.answerService.getAnswer(id);
-		if (!answer.getAuthor().getUsername().equals(principal.getName())) {
+		if (!answer.getAuthor().equals(currentUser)) {
 			throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제권한이 없습니다."); }
 		
 		this.answerService.delete(answer);

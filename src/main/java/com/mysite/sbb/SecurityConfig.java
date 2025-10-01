@@ -1,5 +1,7 @@
 package com.mysite.sbb;
 
+import com.mysite.sbb.user.CustomOAuth2UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,11 +15,15 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
+
+@RequiredArgsConstructor
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
+	private final CustomOAuth2UserService customOAuth2UserService;
+	
 	@Bean
 	 SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 	        http
@@ -30,6 +36,11 @@ public class SecurityConfig {
 	            .formLogin((formLogin) -> formLogin
 	            		.loginPage("/user/login")
 	            		.defaultSuccessUrl("/"))
+	            .oauth2Login((oauth2Login) -> oauth2Login
+	            		.loginPage("/user/login")
+	            		.defaultSuccessUrl("/")
+	            		.userInfoEndpoint((userInfo) -> userInfo
+	            				.userService(customOAuth2UserService)))
 	            .logout((logout) -> logout
 	            		.logoutRequestMatcher(new AntPathRequestMatcher("/user/logout"))
 	            		.logoutSuccessUrl("/")

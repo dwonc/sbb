@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,6 +31,18 @@ public class FreeCommentController {
     private final FreeBoardService freeBoardService;
     private final UserService userService;
 
+    private String getUserIdentifier(Principal principal) {
+		if (principal instanceof Authentication) {
+			Authentication auth = (Authentication) principal;
+			if(auth.getPrincipal() instanceof OAuth2User) {
+				OAuth2User oauth2User = (OAuth2User) auth.getPrincipal();
+				// OAuth2 로그인 : email로 찾기
+				return (String) oauth2User.getAttributes().get("email");
+			}
+		}
+		return principal.getName();
+	}
+    
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/create/{id}")
     public String createComment(Model model, @PathVariable("id") Integer id, @Valid FreeCommentForm freeCommentForm, BindingResult bindingResult, Principal principal) {
@@ -48,8 +62,11 @@ public class FreeCommentController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/modify/{id}")
     public String freeCommentModify(Model model, FreeCommentForm freeCommentForm, @PathVariable("id") Integer id, Principal principal) {
-        FreeComment freeComment = this.freeCommentService.getFreeComment(id);
-        if (!freeComment.getAuthor().getUsername().equals(principal.getName())) {
+    	String identifier = getUserIdentifier(principal);
+	    SiteUser currentUser = this.userService.getUser(identifier); // identifier(ID 또는 Email)로 사용자 조회
+
+    	FreeComment freeComment = this.freeCommentService.getFreeComment(id);
+        if (!freeComment.getAuthor().equals(currentUser)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
         freeCommentForm.setContent(freeComment.getContent());
@@ -63,8 +80,11 @@ public class FreeCommentController {
         if (bindingResult.hasErrors()) {
             return "freecomment_form";
         }
+        String identifier = getUserIdentifier(principal);
+	    SiteUser currentUser = this.userService.getUser(identifier); // identifier(ID 또는 Email)로 사용자 조회
+
         FreeComment freeComment = this.freeCommentService.getFreeComment(id);
-        if (!freeComment.getAuthor().getUsername().equals(principal.getName())) {
+        if (!freeComment.getAuthor().equals(currentUser)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정권한이 없습니다.");
         }
 
@@ -75,8 +95,11 @@ public class FreeCommentController {
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/delete/{id}")
     public String freeCommentDelete(Principal principal, @PathVariable("id") Integer id) {
+    	String identifier = getUserIdentifier(principal);
+	    SiteUser currentUser = this.userService.getUser(identifier); // identifier(ID 또는 Email)로 사용자 조회
+
         FreeComment freeComment = this.freeCommentService.getFreeComment(id);
-        if (!freeComment.getAuthor().getUsername().equals(principal.getName())) {
+        if (!freeComment.getAuthor().equals(currentUser)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제권한이 없습니다.");
         }
 
