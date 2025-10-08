@@ -58,7 +58,8 @@ public class FreeCommentController {
 
         return String.format("redirect:/free/detail/%s#freecomment_%s", id, freeComment.getId());
     }
-
+    
+  
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/modify/{id}")
     public String freeCommentModify(Model model, FreeCommentForm freeCommentForm, @PathVariable("id") Integer id, Principal principal) {

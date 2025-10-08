@@ -28,6 +28,16 @@ public class FreeCommentService {
 		return freeComment;
 	}
 	
+	public FreeComment apicreate(FreeBoard freeBoard, String content, SiteUser author) {
+		FreeComment freeComment = new FreeComment();
+		freeComment.setContent(content);
+		freeComment.setCreateDate(LocalDateTime.now());
+		freeComment.setFreeBoard(freeBoard);
+		freeComment.setAuthor(author);
+		this.freeCommentRepository.save(freeComment);
+		return freeComment;
+	}
+	
 	public FreeComment getFreeComment(Integer id) {
 		Optional<FreeComment> freeComment = this.freeCommentRepository.findById(id);
 		if(freeComment.isPresent()) {

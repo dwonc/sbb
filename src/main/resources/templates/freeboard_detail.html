@@ -34,6 +34,7 @@
 
 	<!-- 댓글 목록 -->
 	<h5 class="border-bottom my-3 py-2" th:text="|${#lists.size(freeboard.commentList)}개의 댓글이 있습니다.|"></h5>
+	<div id="comment-list">
 	<div class="card my-3" th:each="freeComment : ${freeboard.commentList}">
 		<a th:id="|freecomment_${freeComment.id}|"></a>
 		<div class="card-body">
@@ -63,9 +64,10 @@
 			</div>
 		</div>
 	</div>
+	</div>
 
 	<!-- 댓글 작성 -->
-	<form th:action="@{|/freecomment/create/${freeboard.id}|}" th:object="${freeCommentForm}" method="post"
+	<form id="comment-form" th:action="@{|/freecomment/create/${freeboard.id}|}" th:object="${freeCommentForm}" method="post"
 		class="my-3">
 		<div th:replace="form_errors :: formErrorsFragment"></div>
 		<div class="mb-3">
@@ -88,6 +90,102 @@
 			};
 		});
 	});
+	
+	// 댓글 작성 AJAX (신규 추가)
+	
+		const commentForm = document.getElementById('comment-form');
+		
+		if (commentForm) {
+			commentForm.addEventListener('submit', async function(e) {
+				e.preventDefault(); // 기본 form 제출 막기
+				
+				const content = document.getElementById('content').value;
+				const boardId = this.action.split('/').pop();
+				
+				// 빈 내용 체크
+				if (!content.trim()) {
+					alert('댓글 내용을 입력해주세요.');
+					return;
+				}
+				
+				try {
+					const response = await fetch(`/api/freecomment/create/${boardId}`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							content: content
+						})
+					});
+					
+					if (response.ok) {
+						const comment = await response.json();
+						
+						// 새 댓글 HTML 생성 (기존 스타일 유지)
+						const newCommentHTML = `
+							<div class="card my-3">
+								<a id="freecomment_${comment.id}"></a>
+								<div class="card-body">
+									<div class="card-text" style="white-space: pre-line;">${comment.content}</div>
+									<div class="d-flex justify-content-end">
+										<div class="badge bg-light text-dark p-2 text-start">
+											<div class="mb-2">
+												<span>${comment.author}</span>
+											</div>
+											<div>${new Date(comment.createDate).toLocaleString('ko-KR', {
+												year: 'numeric',
+												month: '2-digit',
+												day: '2-digit',
+												hour: '2-digit',
+												minute: '2-digit'
+											}).replace(/\. /g, '-').replace('.', '')}</div>
+										</div>
+									</div>
+									<div class="my-3">
+										<a href="/freecomment/vote/${comment.id}" class="recommend btn btn-sm btn-outline-secondary">
+											추천
+											<span class="badge rounded-pill bg-success">0</span>
+										</a>
+									</div>
+								</div>
+							</div>
+						`;
+						
+						// 댓글 목록에 추가
+						document.getElementById('comment-list').insertAdjacentHTML('beforeend', newCommentHTML);
+						
+						// 입력창 초기화
+						document.getElementById('content').value = '';
+						
+						// 댓글 개수 업데이트 (선택사항)
+						const commentCountElement = document.querySelector('.border-bottom.my-3.py-2');
+						if (commentCountElement) {
+							const currentCount = parseInt(commentCountElement.textContent.match(/\d+/)[0]);
+							commentCountElement.textContent = `${currentCount + 1}개의 댓글이 있습니다.`;
+						}
+						
+						alert('댓글이 등록되었습니다!');
+						
+					} else if (response.status === 400) {
+						// 유효성 검사 실패
+						const error = await response.json();
+						alert('댓글 등록 실패: 내용은 필수항목입니다.');
+					} else if (response.status === 403) {
+						// 인증 실패
+						alert('로그인이 필요합니다.');
+						location.href = '/user/login';
+					} else {
+						alert('댓글 등록에 실패했습니다.');
+					}
+					
+				} catch (error) {
+					console.error('Error:', error);
+					alert('댓글 등록 중 오류가 발생했습니다.');
+				}
+			});
+		}
+	
 </script>
 
 </html>

@@ -37,8 +37,10 @@ public class FreeBoardController {
 	private final UserService userService;
 
 	@GetMapping("/list")
-	public String list(Model model, @RequestParam(value = "page", defaultValue = "0") int page) {
-		Page<FreeBoard> paging = this.freeBoardService.getList(page);
+	public String list(Model model, @RequestParam(value = "page", defaultValue = "0") int page,
+			@RequestParam(value = "kw", defaultValue = "") String kw) {
+		Page<FreeBoard> paging = this.freeBoardService.getList(page, kw);
+		model.addAttribute("kw", kw);
 		model.addAttribute("paging", paging);
 		return "freeboard_list";
 	}

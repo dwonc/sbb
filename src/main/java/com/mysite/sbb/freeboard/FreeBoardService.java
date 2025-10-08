@@ -2,6 +2,7 @@ package com.mysite.sbb.freeboard;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -9,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -19,6 +21,12 @@ import com.mysite.sbb.notice.Notice;
 import com.mysite.sbb.question.Question;
 import com.mysite.sbb.user.SiteUser;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -28,9 +36,31 @@ public class FreeBoardService {
     private final FreeBoardRepository freeBoardRepository;
 	private final CloudinaryService cloudinaryService;
 	
-    public Page<FreeBoard> getList(int page) {
-        Pageable pageable = PageRequest.of(page, 10, Sort.by(Sort.Direction.DESC, "createDate"));
-        return this.freeBoardRepository.findAll(pageable);
+	// 검색 Specification 추가
+	private Specification<FreeBoard> search(String kw) {
+		return new Specification<>() {
+			private static final long serialVersionUID = 1L;
+			
+			@Override
+			public Predicate toPredicate(Root<FreeBoard> f, CriteriaQuery<?> query, CriteriaBuilder cb) {
+					query.distinct(true);
+			Join<FreeBoard, SiteUser> u = f.join("author", JoinType.LEFT);
+			return cb.or(
+					cb.like(f.get("subject"), "%" + kw + "%"),
+					cb.like(f.get("content"), "%" + kw + "%"),
+					cb.like(u.get("username"), "%" + kw + "%")
+					);
+		}
+	};
+	}
+	
+    public Page<FreeBoard> getList(int page, String kw) {
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createDate"));
+    	Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
+    	
+    	Specification<FreeBoard> spec = search(kw);
+        return this.freeBoardRepository.findAll(spec, pageable);
     }
     
     public FreeBoard getFreeBoard(Integer id) {
